@@ -25,7 +25,7 @@ function App(): React.JSX.Element {
             style={styles.fastImage}
             source={{
               uri: 'https://upload.wikimedia.org/wikipedia/commons/4/47/PNG_transparency_demonstration_1.png',
-              cache: FastImage.cacheControl.cacheOnly,
+              cache: FastImage.cacheControl.immutable,
             }}
           />
           <View style={styles.textContainer}>
@@ -35,7 +35,7 @@ function App(): React.JSX.Element {
             style={styles.fastImage}
             source={{
               uri: 'https://dev.w3.org/SVG/tools/svgweb/samples/svg-files/atom.svg',
-              cache: FastImage.cacheControl.cacheOnly,
+              cache: FastImage.cacheControl.immutable,
             }}
           />
           <View style={styles.textContainer}>
@@ -44,8 +44,8 @@ function App(): React.JSX.Element {
           <FastImage
             style={styles.fastImage}
             source={{
-              uri: 'https://dev.w3.org/SVG/tools/svgweb/samples/svg-files/car.svg',
-              cache: FastImage.cacheControl.cacheOnly,
+              uri: 'https://dev.w3.org/SVG/tools/svgweb/samples/svg-files/rails.svg',
+              cache: FastImage.cacheControl.immutable,
               priority: FastImage.priority.normal,
             }}
             resizeMode={FastImage.resizeMode.contain}
@@ -61,8 +61,8 @@ const styles = StyleSheet.create({
     marginTop: 8,
     paddingHorizontal: 24,
   },
-  textContainer: {marginBottom: 10, marginTop: 40},
-  fastImage: {width: 200, height: 200},
+  textContainer: {marginBottom: 10, marginTop: 30},
+  fastImage: {width: 100, height: 100},
   tinyLogo: {
     width: 50,
     height: 50,
