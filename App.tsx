@@ -5,91 +5,51 @@
  * @format
  */
 
+import FastImage from '@d11/react-native-fast-image';
 import React from 'react';
-import type {PropsWithChildren} from 'react';
-import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
-
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
-
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
-
-function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-}
+import {SafeAreaView, ScrollView, StyleSheet, Text, View} from 'react-native';
 
 function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
-
   return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
+    <SafeAreaView>
+      <ScrollView>
+        <View style={styles.container}>
+          <View style={styles.textContainer}>
+            <Text>FastImage with Image and SVG support</Text>
+          </View>
+          <View />
+          <View style={styles.textContainer}>
+            <Text>1 - FastImage with Image</Text>
+          </View>
+          <FastImage
+            style={styles.fastImage}
+            source={{
+              uri: 'https://upload.wikimedia.org/wikipedia/commons/4/47/PNG_transparency_demonstration_1.png',
+              cache: FastImage.cacheControl.cacheOnly,
+            }}
+          />
+          <View style={styles.textContainer}>
+            <Text>2 - FastImage with SVG</Text>
+          </View>
+          <FastImage
+            style={styles.fastImage}
+            source={{
+              uri: 'https://dev.w3.org/SVG/tools/svgweb/samples/svg-files/atom.svg',
+              cache: FastImage.cacheControl.cacheOnly,
+            }}
+          />
+          <View style={styles.textContainer}>
+            <Text>3 - FastImage with complex SVG</Text>
+          </View>
+          <FastImage
+            style={styles.fastImage}
+            source={{
+              uri: 'https://dev.w3.org/SVG/tools/svgweb/samples/svg-files/car.svg',
+              cache: FastImage.cacheControl.cacheOnly,
+              priority: FastImage.priority.normal,
+            }}
+            resizeMode={FastImage.resizeMode.contain}
+          />
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -97,21 +57,15 @@ function App(): React.JSX.Element {
 }
 
 const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
+  container: {
+    marginTop: 8,
     paddingHorizontal: 24,
   },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
+  textContainer: {marginBottom: 10, marginTop: 40},
+  fastImage: {width: 200, height: 200},
+  tinyLogo: {
+    width: 50,
+    height: 50,
   },
 });
 
