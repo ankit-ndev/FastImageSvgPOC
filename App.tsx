@@ -8,6 +8,7 @@
 import FastImage from '@d11/react-native-fast-image';
 import React from 'react';
 import {SafeAreaView, ScrollView, StyleSheet, Text, View} from 'react-native';
+import {SvgUri} from 'react-native-svg';
 
 function App(): React.JSX.Element {
   return (
@@ -39,16 +40,28 @@ function App(): React.JSX.Element {
             }}
           />
           <View style={styles.textContainer}>
-            <Text>3 - FastImage with complex SVG</Text>
+            <Text>3 - FastImage with SVG and dynamic color</Text>
           </View>
           <FastImage
             style={styles.fastImage}
             source={{
-              uri: 'https://dev.w3.org/SVG/tools/svgweb/samples/svg-files/rails.svg',
+              uri: 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/icons/heart-fill.svg',
               cache: FastImage.cacheControl.immutable,
               priority: FastImage.priority.normal,
+              color: '#553fff',
             }}
             resizeMode={FastImage.resizeMode.contain}
+          />
+          <View style={styles.textContainer}>
+            <Text>
+              4 - react-native-svg Lib - SVGUri with url and dynamic color
+            </Text>
+          </View>
+          <SvgUri
+            width="50"
+            height="50"
+            color="saddlebrown"
+            uri="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/icons/heart-fill.svg"
           />
         </View>
       </ScrollView>
@@ -62,7 +75,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
   },
   textContainer: {marginBottom: 10, marginTop: 30},
-  fastImage: {width: 100, height: 100},
+  fastImage: {width: 50, height: 50},
   tinyLogo: {
     width: 50,
     height: 50,

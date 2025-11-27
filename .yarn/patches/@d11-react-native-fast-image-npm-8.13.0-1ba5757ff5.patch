@@ -1,0 +1,405 @@
+diff --git a/android/src/main/java/com/dylanvann/fastimage/FastImageViewConverter.java b/android/src/main/java/com/dylanvann/fastimage/FastImageViewConverter.java
+index 6cf7d8b761663d0afb956fbfa3e3e0132e043eb5..132a6864e78b00238ccd0b1a167e689f4c3a35df 100644
+--- a/android/src/main/java/com/dylanvann/fastimage/FastImageViewConverter.java
++++ b/android/src/main/java/com/dylanvann/fastimage/FastImageViewConverter.java
+@@ -21,6 +21,7 @@ import com.facebook.react.bridge.ReadableArray;
+ import com.facebook.react.bridge.ReadableMap;
+ import com.facebook.react.bridge.ReadableMapKeySetIterator;
+ import com.facebook.react.bridge.ReadableType;
++import com.fastimage.svg.SvgDecoder;
+ 
+ import java.util.HashMap;
+ import java.util.Map;
+@@ -154,6 +155,13 @@ class FastImageViewConverter {
+             options = options.apply(signatureOf(ApplicationVersionSignature.obtain(context)));
+         }
+ 
++        if (source != null && source.hasKey("color")) {
++                String svgColor = source.getString("color");
++            if (svgColor != null && !svgColor.isEmpty()) {
++                options = options.set(SvgDecoder.SVG_COLOR, svgColor);
++            }
++        }
++
+         return options;
+     }
+ 
+diff --git a/android/src/svg/java/com/fastimage/svg/ColorConverter.java b/android/src/svg/java/com/fastimage/svg/ColorConverter.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..ce1644624fffb701a0b8fc0ebdabc727cfbb3c77
+--- /dev/null
++++ b/android/src/svg/java/com/fastimage/svg/ColorConverter.java
+@@ -0,0 +1,250 @@
++package com.fastimage.svg;
++
++import android.graphics.Color;
++import androidx.annotation.Nullable;
++
++/**
++ * Converts color names and hex strings to hex format
++ * Supports: named colors (black, blue, red, etc.) and hex (#RRGGBB, #RGB)
++ */
++public class ColorConverter {
++
++    /**
++     * Convert color string (name or hex) to hex format
++     * @param colorInput "black", "blue", "#FF0000", "FF0000", "#FFF", etc.
++     * @return Hex string "#RRGGBB" or null if invalid
++     */
++    @Nullable
++    public static String toHexColor(String colorInput) {
++        if (colorInput == null || colorInput.isEmpty()) {
++            return null;
++        }
++
++        // Try as named color first
++        int colorInt = parseNamedColor(colorInput);
++
++        // If not a named color, try as hex
++        if (colorInt == -1) {
++            colorInt = parseHexColor(colorInput);
++        }
++
++        // If still invalid, return null
++        if (colorInt == -1) {
++            return null;
++        }
++
++        // Convert to hex string
++        return String.format("#%06X", (colorInt & 0xFFFFFF));
++    }
++
++    /**
++     * Parse named color strings (black, white, red, blue, etc.)
++     * @return Color int or -1 if not a valid named color
++     */
++    private static int parseNamedColor(String colorName) {
++        if (colorName == null) return -1;
++
++        String lower = colorName.toLowerCase().trim();
++
++        switch (lower) {
++            // Basic colors
++            case "black": return Color.BLACK;
++            case "white": return Color.WHITE;
++            case "red": return Color.RED;
++            case "green": return Color.GREEN;
++            case "blue": return Color.BLUE;
++            case "yellow": return Color.YELLOW;
++            case "cyan": return Color.CYAN;
++            case "magenta": return Color.MAGENTA;
++            case "gray":
++            case "grey": return Color.GRAY;
++
++            // Light variants
++            case "lightgray":
++            case "lightgrey": return Color.LTGRAY;
++            case "darkgray":
++            case "darkgrey": return Color.DKGRAY;
++
++            // Extended colors (CSS color names)
++            case "aliceblue": return 0xFFF0F8FF;
++            case "antiquewhite": return 0xFFFFEBCD;
++            case "aqua": return 0xFF00FFFF;
++            case "aquamarine": return 0xFF7FFFD4;
++            case "azure": return 0xFFF0FFFF;
++            case "beige": return 0xFFFFFFF0;
++            case "bisque": return 0xFFFFE4C4;
++            case "blanchedalmond": return 0xFFFFEBCD;
++            case "blueviolet": return 0xFF8A2BE2;
++            case "brown": return 0xFFA52A2A;
++            case "burlywood": return 0xFFDEB887;
++            case "cadetblue": return 0xFF5F9EA0;
++            case "chartreuse": return 0xFF7FFF00;
++            case "chocolate": return 0xFFD2691E;
++            case "coral": return 0xFFFF7F50;
++            case "cornflowerblue": return 0xFF6495ED;
++            case "cornsilk": return 0xFFFFF8DC;
++            case "crimson": return 0xFFDC143C;
++            case "darkblue": return 0xFF00008B;
++            case "darkcyan": return 0xFF008B8B;
++            case "darkgoldenrod": return 0xFFB8860B;
++            case "darkgreen": return 0xFF006400;
++            case "darkkhaki": return 0xFFBDB76B;
++            case "darkmagenta": return 0xFF8B008B;
++            case "darkolivegreen": return 0xFF556B2F;
++            case "darkorange": return 0xFFFF8C00;
++            case "darkorchid": return 0xFF9932CC;
++            case "darkred": return 0xFF8B0000;
++            case "darksalmon": return 0xFFE9967A;
++            case "darkseagreen": return 0xFF8FBC8F;
++            case "darkslateblue": return 0xFF483D8B;
++            case "darkslategray":
++            case "darkslategrey": return 0xFF2F4F4F;
++            case "darkturquoise": return 0xFF00CED1;
++            case "darkviolet": return 0xFF9400D3;
++            case "deeppink": return 0xFFFF1493;
++            case "deepskyblue": return 0xFF00BFFF;
++            case "dimgray":
++            case "dimgrey": return 0xFF696969;
++            case "dodgerblue": return 0xFF1E90FF;
++            case "firebrick": return 0xFFB22222;
++            case "floralwhite": return 0xFFFFFAF0;
++            case "forestgreen": return 0xFF228B22;
++            case "fuchsia": return 0xFFFF00FF;
++            case "gainsboro": return 0xFFDCDCDC;
++            case "ghostwhite": return 0xFFF8F8FF;
++            case "gold": return 0xFFFFD700;
++            case "goldenrod": return 0xFFDAA520;
++            case "greenyellow": return 0xFFADFF2F;
++            case "honeydew": return 0xFFF0FFF0;
++            case "hotpink": return 0xFFFF69B4;
++            case "indianred": return 0xFFCD5C5C;
++            case "indigo": return 0xFF4B0082;
++            case "ivory": return 0xFFFFFFF0;
++            case "khaki": return 0xFFFFFFF0;
++            case "lavender": return 0xFFE6E6FA;
++            case "lavenderblush": return 0xFFFFF0F5;
++            case "lawngreen": return 0xFF7CFC00;
++            case "lemonchiffon": return 0xFFFFFACD;
++            case "lightblue": return 0xFFADD8E6;
++            case "lightcoral": return 0xFFF08080;
++            case "lightcyan": return 0xFFE0FFFF;
++            case "lightgoldenrodyellow": return 0xFFFAFAD2;
++            case "lightgreen": return 0xFF90EE90;
++            case "lightpink": return 0xFFFFB6C1;
++            case "lightsalmon": return 0xFFFFA07A;
++            case "lightseagreen": return 0xFF20B2AA;
++            case "lightskyblue": return 0xFF87CEFA;
++            case "lightslategray":
++            case "lightslategrey": return 0xFF778899;
++            case "lightsteelblue": return 0xFFB0C4DE;
++            case "lightyellow": return 0xFFFFFFE0;
++            case "lime": return 0xFF00FF00;
++            case "limegreen": return 0xFF32CD32;
++            case "linen": return 0xFFFAF0E6;
++            case "maroon": return 0xFF800000;
++            case "mediumaquamarine": return 0xFF66CDAA;
++            case "mediumblue": return 0xFF0000CD;
++            case "mediumorchid": return 0xFFBA55D3;
++            case "mediumpurple": return 0xFF9370DB;
++            case "mediumseagreen": return 0xFF3CB371;
++            case "mediumslateblue": return 0xFF7B68EE;
++            case "mediumspringgreen": return 0xFF00FA9A;
++            case "mediumturquoise": return 0xFF48D1CC;
++            case "mediumvioletred": return 0xFFC71585;
++            case "midnightblue": return 0xFF191970;
++            case "mintcream": return 0xFFF5FFFA;
++            case "mistyrose": return 0xFFFFE4E1;
++            case "moccasin": return 0xFFFFE4B5;
++            case "navajowhite": return 0xFFFFDEAD;
++            case "navy": return 0xFF000080;
++            case "oldlace": return 0xFFFDF5E6;
++            case "olive": return 0xFF808000;
++            case "olivedrab": return 0xFF6B8E23;
++            case "orange": return 0xFFFFA500;
++            case "orangered": return 0xFFFF4500;
++            case "orchid": return 0xFFDA70D6;
++            case "palegoldenrod": return 0xFFEEE8AA;
++            case "palegreen": return 0xFF98FB98;
++            case "paleturquoise": return 0xFFAFEEEE;
++            case "palevioletred": return 0xFFDB7093;
++            case "papayawhip": return 0xFFFFEFD5;
++            case "peachpuff": return 0xFFFFDAB9;
++            case "peru": return 0xFFCD853F;
++            case "pink": return 0xFFFFC0CB;
++            case "plum": return 0xFFDDA0DD;
++            case "powderblue": return 0xFFB0E0E6;
++            case "purple": return 0xFF800080;
++            case "rebeccapurple": return 0xFF663399;
++            case "rosybrown": return 0xFFBC8F8F;
++            case "royalblue": return 0xFF4169E1;
++            case "saddlebrown": return 0xFF8B4513;
++            case "salmon": return 0xFFFA8072;
++            case "sandybrown": return 0xFFF4A460;
++            case "seagreen": return 0xFF2E8B57;
++            case "seashell": return 0xFFFFF5EE;
++            case "sienna": return 0xFFA0522D;
++            case "silver": return 0xFFC0C0C0;
++            case "skyblue": return 0xFF87CEEB;
++            case "slateblue": return 0xFF6A5ACD;
++            case "slategray":
++            case "slategrey": return 0xFF708090;
++            case "snow": return 0xFFFFFAFA;
++            case "springgreen": return 0xFF00FF7F;
++            case "steelblue": return 0xFF4682B4;
++            case "tan": return 0xFFD2B48C;
++            case "teal": return 0xFF008080;
++            case "thistle": return 0xFFD8BFD8;
++            case "tomato": return 0xFFFF6347;
++            case "turquoise": return 0xFF40E0D0;
++            case "violet": return 0xFFEE82EE;
++            case "wheat": return 0xFFF5DEB3;
++            case "whitesmoke": return 0xFFF5F5F5;
++            case "yellowgreen": return 0xFF9ACD32;
++
++            default:
++                return -1; // Not a valid named color
++        }
++    }
++
++    /**
++     * Parse hex color strings (#RRGGBB, #RGB, RRGGBB, RGB)
++     * @return Color int or -1 if invalid
++     */
++    private static int parseHexColor(String hexColor) {
++        if (hexColor == null || hexColor.isEmpty()) {
++            return -1;
++        }
++
++        String hex = hexColor;
++
++        // Remove # if present
++        if (hex.startsWith("#")) {
++            hex = hex.substring(1);
++        }
++
++        // Validate hex format
++        if (!hex.matches("[0-9A-Fa-f]{3}|[0-9A-Fa-f]{6}|[0-9A-Fa-f]{8}")) {
++            return -1;
++        }
++
++        try {
++            // Expand 3-digit to 6-digit
++            if (hex.length() == 3) {
++                hex = "" + hex.charAt(0) + hex.charAt(0)
++                        + hex.charAt(1) + hex.charAt(1)
++                        + hex.charAt(2) + hex.charAt(2);
++            }
++
++            long colorLong = Long.parseLong(hex, 16);
++
++            // Add alpha if not present (8 digits)
++            if (hex.length() == 6) {
++                colorLong = colorLong | 0xFF000000L;
++            }
++
++            return (int) colorLong;
++        } catch (Exception e) {
++            return -1;
++        }
++    }
++}
+\ No newline at end of file
+diff --git a/android/src/svg/java/com/fastimage/svg/SvgDecoder.java b/android/src/svg/java/com/fastimage/svg/SvgDecoder.java
+index 8612cb508e176ac4af9c5d545386ce1e2d08353b..064fba6fcb2b8b68370c745b0fda6e26d978786c 100644
+--- a/android/src/svg/java/com/fastimage/svg/SvgDecoder.java
++++ b/android/src/svg/java/com/fastimage/svg/SvgDecoder.java
+@@ -11,6 +11,7 @@ import com.caverock.androidsvg.SVG;
+ import com.caverock.androidsvg.SVGParseException;
+ import java.io.IOException;
+ import java.io.InputStream;
++import java.nio.charset.StandardCharsets;
+ 
+ /**
+  * Decodes an SVG internal representation from an [InputStream].
+@@ -24,21 +25,81 @@ public class SvgDecoder implements ResourceDecoder<InputStream, SVG> {
+     // TODO: Can we tell?
+     return true;
+   }
++  public static final com.bumptech.glide.load.Option<String> SVG_COLOR =
++          com.bumptech.glide.load.Option.memory("svg_color", null);
+ 
++  @Override
+   public Resource<SVG> decode(
+-      @NonNull InputStream source, int width, int height, @NonNull Options options)
+-      throws IOException {
++          @NonNull InputStream source,
++          int width,
++          int height,
++          @NonNull Options options
++  ) throws IOException {
+     try {
+-      SVG svg = SVG.getFromInputStream(source);
++      // Color string coming from FastImage (e.g. "black", "#FF0000", "FF0000", "#FFF", etc.)
++      String svgColor = options.get(SVG_COLOR);
++
++      // Read downloaded SVG bytes into a String
++      String svgString = readInputStreamAsString(source);
++
++      // Only attempt to map currentColor if a color was provided
++      if (svgColor != null && !svgColor.isEmpty()) {
++        svgString = mapCurrentColor(svgString, svgColor);
++      }
++
++      // Parse SVG from (possibly modified) XML
++      SVG svg = SVG.getFromString(svgString);
++
+       if (width != SIZE_ORIGINAL) {
+         svg.setDocumentWidth(width);
+       }
+       if (height != SIZE_ORIGINAL) {
+         svg.setDocumentHeight(height);
+       }
++
+       return new SimpleResource<>(svg);
+     } catch (SVGParseException ex) {
+       throw new IOException("Cannot load SVG from stream", ex);
+     }
+   }
++
++  /**
++   * Maps fill="currentColor" / stroke="currentColor" in the SVG XML to the provided color.
++   * Uses ColorConverter.toHexColor() to support named colors and hex.
++   *
++   * If the color is invalid, returns the original svgString unchanged.
++   */
++  private String mapCurrentColor(String svgString, String color) {
++    // Convert any accepted string (named or hex) into "#RRGGBB"
++    String normalizedColor = com.fastimage.svg.ColorConverter.toHexColor(color);
++
++    if (normalizedColor == null) {
++      // Invalid color: do NOT modify the SVG at all
++      return svgString;
++    }
++
++    // Replace fill="currentColor"
++    svgString = svgString.replaceAll(
++            "fill=\"currentColor\"",
++            "fill=\"" + normalizedColor + "\""
++    );
++
++    // Replace stroke="currentColor"
++    svgString = svgString.replaceAll(
++            "stroke=\"currentColor\"",
++            "stroke=\"" + normalizedColor + "\""
++    );
++
++    return svgString;
++  }
++
++  private String readInputStreamAsString(InputStream inputStream) throws IOException {
++    StringBuilder sb = new StringBuilder();
++    byte[] buffer = new byte[1024];
++    int length;
++    while ((length = inputStream.read(buffer)) != -1) {
++      sb.append(new String(buffer, 0, length, StandardCharsets.UTF_8));
++    }
++    return sb.toString();
++  }
+ }
+\ No newline at end of file
+diff --git a/dist/index.d.ts b/dist/index.d.ts
+index 2332172879ceb91ba8cb6896be58a9acadea9295..6a17dd91b707c1d89b92caf18e3af445ab82af24 100644
+--- a/dist/index.d.ts
++++ b/dist/index.d.ts
+@@ -31,6 +31,7 @@ export type Source = {
+     };
+     priority?: Priority;
+     cache?: Cache;
++    color?: string;
+ };
+ export interface OnLoadEvent {
+     nativeEvent: {
+diff --git a/src/index.tsx b/src/index.tsx
+index 877b287074e291c0dcec64e0ff3545b1a87d0006..1703560deed6d281eeedd116e3cefce145119fd6 100644
+--- a/src/index.tsx
++++ b/src/index.tsx
+@@ -68,6 +68,7 @@ export type Source = {
+     headers?: { [key: string]: string }
+     priority?: Priority
+     cache?: Cache
++    color?: string
+ }
+ 
+ export interface OnLoadEvent {
